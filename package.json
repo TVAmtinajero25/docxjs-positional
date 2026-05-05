@@ -41,7 +41,7 @@
     "build": "rollup --config rollup.config.mjs",
     "build-prod": "rollup --config rollup.config.mjs --environment BUILD:production",
     "watch": "rollup --config rollup.config.mjs --watch",
-    "prepare": "npm run build",
+    "prepare": "npm run build-prod",
     "e2e": "karma start karma.conf.cjs --single-run",
     "e2e-watch": "karma start karma.conf.cjs"
   },
