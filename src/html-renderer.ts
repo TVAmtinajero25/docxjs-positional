@@ -69,6 +69,15 @@ export class HtmlRenderer {
 	postRenderTasks: any[] = [];
 	h = h;
 
+	// SPIKE B+ — contadores de posición OOXML inyectados como data-* en el HTML
+	// para mapear browser selection -> coordenadas (part_path, paragraph_idx, run_idx, char_offset).
+	// paragraphCountersByPart: cada archivo OOXML (word/document.xml, word/header1.xml,
+	// word/footer1.xml, etc.) tiene su propia secuencia de párrafos arrancando en 0
+	// para que el índice se alinee con el orden interno del XML.
+	// runCounter se resetea por cada paragraph.
+	paragraphCountersByPart: Record<string, number> = {};
+	runCounter: number = 0;
+
 	async render(document: WordDocument, options: Options): Promise<Node[]> {
 		this.document = document;
 		this.options = options;
@@ -77,6 +86,8 @@ export class HtmlRenderer {
 		this.h = options.h ?? h;
 		this.styleMap = null;
 		this.tasks = [];
+		this.paragraphCountersByPart = {};
+		this.runCounter = 0;
 
 		if (this.options.renderComments && globalThis.Highlight) {
 			this.commentHighlight = new Highlight();
@@ -909,6 +920,15 @@ section.${c}>footer { z-index: 1; }
 	}
 
 	renderParagraph(elem: WmlParagraph) {
+		// SPIKE B+: cada parte del paquete OOXML (body / header / footer) tiene su
+		// propio contador de párrafos arrancando en 0, alineado con el orden interno
+		// de su archivo XML. Esto garantiza que la coordenada (part, idx) sea válida
+		// para mutar el archivo correcto vía pizzip más tarde.
+		const partPath = (this.currentPart ?? this.document.documentPart).path;
+		const paragraphIdx = this.paragraphCountersByPart[partPath] ?? 0;
+		this.paragraphCountersByPart[partPath] = paragraphIdx + 1;
+		this.runCounter = 0;
+
 		var result = this.toHTML(elem, ns.html, "p");
 
 		const style = this.findStyle(elem.styleName);
@@ -919,6 +939,9 @@ section.${c}>footer { z-index: 1; }
 		if (numbering) {
 			result.classList.add(this.numberingClass(numbering.id, numbering.level));
 		}
+
+		result.setAttribute('data-paragraph-idx', String(paragraphIdx));
+		result.setAttribute('data-part', partPath);
 
 		return result;
 	}
@@ -1100,6 +1123,9 @@ section.${c}>footer { z-index: 1; }
 		if (elem.fieldRun)
 			return null;
 
+		// SPIKE B+: capturar índice del run dentro de su paragraph antes del incremento.
+		const runIdx = this.runCounter++;
+
 		let children = this.renderElements(elem.children);
 
 		if (elem.verticalAlign) {
@@ -1110,6 +1136,8 @@ section.${c}>footer { z-index: 1; }
 
 		if (elem.id)
 			result.id = elem.id;
+
+		result.setAttribute('data-run-idx', String(runIdx));
 
 		return result;
 	}

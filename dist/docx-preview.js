@@ -2919,6 +2919,8 @@
             this.tasks = [];
             this.postRenderTasks = [];
             this.h = h;
+            this.paragraphCountersByPart = {};
+            this.runCounter = 0;
         }
         async render(document, options) {
             this.document = document;
@@ -2928,6 +2930,8 @@
             this.h = options.h ?? h;
             this.styleMap = null;
             this.tasks = [];
+            this.paragraphCountersByPart = {};
+            this.runCounter = 0;
             if (this.options.renderComments && globalThis.Highlight) {
                 this.commentHighlight = new Highlight();
             }
@@ -3523,6 +3527,10 @@ section.${c}>footer { z-index: 1; }
             return this.h({ ns, tagName, children: this.renderElements(elem.children), ...props });
         }
         renderParagraph(elem) {
+            const partPath = (this.currentPart ?? this.document.documentPart).path;
+            const paragraphIdx = this.paragraphCountersByPart[partPath] ?? 0;
+            this.paragraphCountersByPart[partPath] = paragraphIdx + 1;
+            this.runCounter = 0;
             var result = this.toHTML(elem, ns.html, "p");
             const style = this.findStyle(elem.styleName);
             elem.tabs ?? (elem.tabs = style?.paragraphProps?.tabs);
@@ -3530,6 +3538,8 @@ section.${c}>footer { z-index: 1; }
             if (numbering) {
                 result.classList.add(this.numberingClass(numbering.id, numbering.level));
             }
+            result.setAttribute('data-paragraph-idx', String(paragraphIdx));
+            result.setAttribute('data-part', partPath);
             return result;
         }
         renderHyperlink(elem) {
@@ -3664,6 +3674,7 @@ section.${c}>footer { z-index: 1; }
         renderRun(elem) {
             if (elem.fieldRun)
                 return null;
+            const runIdx = this.runCounter++;
             let children = this.renderElements(elem.children);
             if (elem.verticalAlign) {
                 children = [this.h({ tagName: elem.verticalAlign, children: this.renderElements(elem.children) })];
@@ -3671,6 +3682,7 @@ section.${c}>footer { z-index: 1; }
             const result = this.toHTML(elem, ns.html, "span", children);
             if (elem.id)
                 result.id = elem.id;
+            result.setAttribute('data-run-idx', String(runIdx));
             return result;
         }
         renderTable(elem) {

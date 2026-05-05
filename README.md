@@ -1,4 +1,27 @@
-[![npm version](https://badge.fury.io/js/docx-preview.svg)](https://www.npmjs.com/package/docx-preview)
+# docxjs-positional
+
+Fork de [VolodymyrBaydalka/docxjs](https://github.com/VolodymyrBaydalka/docxjs) (Apache 2.0) que inyecta atributos posicionales en el HTML resultante de `renderAsync`:
+
+- `data-paragraph-idx` — índice del párrafo dentro del archivo OOXML (`word/document.xml` o headers/footers)
+- `data-part` — path del archivo OOXML al que pertenece el párrafo
+- `data-run-idx` — índice del run dentro del párrafo
+
+Esto permite resolver una `Range` del browser de regreso a coordenadas OOXML para mutación quirúrgica posterior.
+
+Atribución: este fork conserva la licencia Apache 2.0 del proyecto upstream. Ver [LICENSE](LICENSE).
+
+## Instalación desde GitHub
+
+```bash
+npm install github:TVAmtinajero25/docxjs-positional#<SHA>
+```
+
+El script `prepare` genera el bundle automáticamente al instalar (no se publica al npm registry).
+
+---
+
+## Documentación upstream original
+
 [![Support Ukraine](https://img.shields.io/badge/Support-Ukraine-blue?style=flat&logo=adguard)](https://war.ukraine.ua/)
 
 # docxjs

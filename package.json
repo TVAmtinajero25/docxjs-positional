@@ -1,17 +1,25 @@
 {
-  "name": "docx-preview",
+  "name": "docxjs-positional",
   "version": "0.3.7",
   "license": "Apache-2.0",
   "keywords": [
     "word",
-    "docx"
+    "docx",
+    "positional",
+    "ooxml"
   ],
   "author": {
     "name": "Volodymyr Baydalka"
   },
+  "contributors": [
+    {
+      "name": "Marco Tinajero",
+      "url": "https://github.com/TVAmtinajero25"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VolodymyrBaydalka/docxjs.git"
+    "url": "git+https://github.com/TVAmtinajero25/docxjs-positional.git"
   },
   "dependencies": {
     "jszip": ">=3.0.0"
@@ -33,6 +41,7 @@
     "build": "rollup --config rollup.config.mjs",
     "build-prod": "rollup --config rollup.config.mjs --environment BUILD:production",
     "watch": "rollup --config rollup.config.mjs --watch",
+    "prepare": "npm run build",
     "e2e": "karma start karma.conf.cjs --single-run",
     "e2e-watch": "karma start karma.conf.cjs"
   },
